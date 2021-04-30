@@ -1,8 +1,9 @@
-<img src="Shadowsocks.WPF/Resources/ssw128.png" alt="[logo]" width="48"/> Shadowsocks for Windows
-=======================
+# <img src="Shadowsocks.WPF/Resources/ssw128.png" alt="[logo]" width="48"/> Shadowsocks.NET
 
 [![Build](https://github.com/shadowsocks/shadowsocks-windows/workflows/Build/badge.svg)](https://github.com/shadowsocks/shadowsocks-windows/actions?query=workflow%3ABuild)
 [![Release](https://github.com/shadowsocks/shadowsocks-windows/workflows/Release/badge.svg)](https://github.com/shadowsocks/shadowsocks-windows/actions?query=workflow%3ARelease)
+
+A cross-platform Shadowsocks implementation in C#.
 
 ## Features
 
