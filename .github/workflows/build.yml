@@ -2,19 +2,15 @@ name: Build
 
 on:
   push:
-    branches-ignore:
-      - 'v4'
-      - 'rm'
+    branches:
+      - '**'
     paths-ignore:
       - 'README.md'
-      - 'LICENSE.txt'
+      - 'LICENSE'
   pull_request:
-    branches-ignore:
-      - 'v4'
-      - 'rm'
     paths-ignore:
       - 'README.md'
-      - 'LICENSE.txt'
+      - 'LICENSE'
 
 jobs:
   build:
