@@ -12,8 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Restore dependencies
-        run: dotnet restore
       - name: Pack and upload NuGet package
         run: |
           dotnet pack Shadowsocks -c Release
