@@ -1,5 +1,8 @@
+using OpenOnlineConfig.v1;
 using Shadowsocks.Interop.Utils;
 using Shadowsocks.Models;
+using Shadowsocks.OnlineConfig.OOCv1;
+using Shadowsocks.OnlineConfig.SIP008;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,14 +21,14 @@ namespace Shadowsocks.CLI
         /// Gets or sets whether to prefix group name to server names.
         /// </summary>
         public bool PrefixGroupName { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the list of servers that are not in any groups.
         /// </summary>
-        public List<Server> Servers { get; set; } = new();
+        public List<IServer> Servers { get; set; } = new();
 
         public ConfigConverter(bool prefixGroupName = false) => PrefixGroupName = prefixGroupName;
-        
+
         /// <summary>
         /// Collects servers from ss:// links or SIP008 delivery links.
         /// </summary>
@@ -44,6 +47,9 @@ namespace Shadowsocks.CLI
                         {
                             if (Server.TryParse(uri, out var server))
                                 Servers.Add(server);
+                            else
+                                Console.WriteLine($"Warning: Skipping invalid ss:// link {uri.AbsoluteUri}");
+
                             break;
                         }
 
@@ -59,8 +65,9 @@ namespace Shadowsocks.CLI
                 {
                     Timeout = TimeSpan.FromSeconds(30.0)
                 };
-                var tasks = sip008Links.Select(async x => await httpClient.GetFromJsonAsync<Group>(x, JsonHelper.snakeCaseJsonDeserializerOptions, cancellationToken))
+                var tasks = sip008Links.Select(x => httpClient.GetFromJsonAsync<SIP008Config>(x, JsonHelper.snakeCaseJsonDeserializerOptions, cancellationToken))
                                        .ToList();
+
                 while (tasks.Count > 0)
                 {
                     var finishedTask = await Task.WhenAny(tasks);
@@ -68,6 +75,56 @@ namespace Shadowsocks.CLI
                     if (group != null)
                         Servers.AddRange(group.Servers);
                     tasks.Remove(finishedTask);
+                }
+            }
+        }
+
+        public async Task FromOOCv1ApiTokens(IEnumerable<string> tokens, CancellationToken cancellationToken = default)
+        {
+            var httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(30.0)
+            };
+
+            var tasks = new List<Task<OOCConfigShadowsocks?>>();
+
+            foreach (var tokenString in tokens)
+            {
+                var token = JsonSerializer.Deserialize<OOCv1ApiToken>(tokenString, JsonHelper.camelCaseJsonDeserializerOptions);
+                if (token is null)
+                {
+                    Console.WriteLine($"Warning: Skipping invalid API token {tokenString}");
+                    continue;
+                }
+
+                tasks.Add(httpClient.GetFromJsonAsync<OOCConfigShadowsocks>($"{token.BaseUrl}/{token.Secret}/ooc/v1/{token.UserId}", cancellationToken));
+            }
+
+            while (tasks.Count > 0)
+            {
+                var finishedTask = await Task.WhenAny(tasks);
+                var config = await finishedTask;
+                if (config is not null)
+                    Servers.AddRange(config.Shadowsocks);
+                tasks.Remove(finishedTask);
+            }
+        }
+
+        /// <summary>
+        /// Collects servers from OOCv1 JSON files.
+        /// </summary>
+        /// <param name="paths">JSON file paths.</param>
+        /// <param name="cancellationToken">A token that may be used to cancel the read operation.</param>
+        /// <returns>A task that represents the asynchronous read operation.</returns>
+        public async Task FromOOCv1Json(IEnumerable<string> paths, CancellationToken cancellationToken = default)
+        {
+            foreach (var path in paths)
+            {
+                using var jsonFile = new FileStream(path, FileMode.Open);
+                var config = await JsonSerializer.DeserializeAsync<OOCConfigShadowsocks>(jsonFile, JsonHelper.camelCaseJsonDeserializerOptions, cancellationToken);
+                if (config != null)
+                {
+                    Servers.AddRange(config.Shadowsocks);
                 }
             }
         }
@@ -83,12 +140,10 @@ namespace Shadowsocks.CLI
             foreach (var path in paths)
             {
                 using var jsonFile = new FileStream(path, FileMode.Open);
-                var group = await JsonSerializer.DeserializeAsync<Group>(jsonFile, JsonHelper.snakeCaseJsonDeserializerOptions, cancellationToken);
-                if (group != null)
+                var config = await JsonSerializer.DeserializeAsync<SIP008Config>(jsonFile, JsonHelper.snakeCaseJsonDeserializerOptions, cancellationToken);
+                if (config != null)
                 {
-                    if (PrefixGroupName && !string.IsNullOrEmpty(group.Name))
-                        group.Servers.ForEach(x => x.Name = $"{group.Name} - {x.Name}");
-                    Servers.AddRange(group.Servers);
+                    Servers.AddRange(config.Servers);
                 }
             }
         }
@@ -109,12 +164,12 @@ namespace Shadowsocks.CLI
                 {
                     foreach (var outbound in v2rayConfig.Outbounds)
                     {
-                        if (outbound.Protocol == "shadowsocks"
-                            && outbound.Settings is JsonElement jsonElement)
+                        if (outbound.Protocol == "shadowsocks" && outbound.Settings is JsonElement jsonElement)
                         {
                             var jsonText = jsonElement.GetRawText();
                             var ssConfig = JsonSerializer.Deserialize<Interop.V2Ray.Protocols.Shadowsocks.OutboundConfigurationObject>(jsonText, JsonHelper.camelCaseJsonDeserializerOptions);
                             if (ssConfig != null)
+                            {
                                 foreach (var ssServer in ssConfig.Servers)
                                 {
                                     var server = new Server
@@ -125,8 +180,10 @@ namespace Shadowsocks.CLI
                                         Method = ssServer.Method,
                                         Password = ssServer.Password
                                     };
+
                                     Servers.Add(server);
                                 }
+                            }
                         }
                     }
                 }
@@ -148,6 +205,26 @@ namespace Shadowsocks.CLI
         }
 
         /// <summary>
+        /// Converts saved servers to OOCv1 JSON.
+        /// </summary>
+        /// <param name="path">JSON file path.</param>
+        /// <param name="cancellationToken">A token that may be used to cancel the write operation.</param>
+        /// <returns>A task that represents the asynchronous write operation.</returns>
+        public Task ToOOCv1Json(string path, CancellationToken cancellationToken = default)
+        {
+            var config = new OOCConfigShadowsocks();
+            foreach (var server in Servers)
+                config.Shadowsocks.Add(new(server));
+
+            var fullPath = Path.GetFullPath(path);
+            var directoryPath = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("Invalid path", nameof(path));
+            Directory.CreateDirectory(directoryPath);
+
+            using var jsonFile = new FileStream(fullPath, FileMode.Create);
+            return JsonSerializer.SerializeAsync(jsonFile, config, JsonHelper.camelCaseJsonSerializerOptions, cancellationToken);
+        }
+
+        /// <summary>
         /// Converts saved servers to SIP008 JSON.
         /// </summary>
         /// <param name="path">JSON file path.</param>
@@ -155,15 +232,16 @@ namespace Shadowsocks.CLI
         /// <returns>A task that represents the asynchronous write operation.</returns>
         public Task ToSip008Json(string path, CancellationToken cancellationToken = default)
         {
-            var group = new Group();
-
-            group.Servers.AddRange(Servers);
+            var config = new SIP008Config();
+            foreach (var server in Servers)
+                config.Servers.Add(new(server));
 
             var fullPath = Path.GetFullPath(path);
             var directoryPath = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("Invalid path", nameof(path));
             Directory.CreateDirectory(directoryPath);
+
             using var jsonFile = new FileStream(fullPath, FileMode.Create);
-            return JsonSerializer.SerializeAsync(jsonFile, group, JsonHelper.snakeCaseJsonSerializerOptions, cancellationToken);
+            return JsonSerializer.SerializeAsync(jsonFile, config, JsonHelper.snakeCaseJsonSerializerOptions, cancellationToken);
         }
 
         /// <summary>

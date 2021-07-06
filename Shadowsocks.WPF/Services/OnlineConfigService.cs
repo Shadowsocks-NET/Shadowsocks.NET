@@ -35,8 +35,8 @@ namespace Shadowsocks.WPF.Services
             var downloadedGroup = await _httpClient.GetFromJsonAsync<Group>(_group.OnlineConfigSource);
             if (downloadedGroup == null)
                 throw new Exception("An error occurred.");
+
             // Merge downloaded group into existing group
-            _group.Version = downloadedGroup.Version;
             _group.BytesUsed = downloadedGroup.BytesUsed;
             _group.BytesRemaining = downloadedGroup.BytesRemaining;
             _group.Servers = downloadedGroup.Servers; // TODO: preserve per-server statistics

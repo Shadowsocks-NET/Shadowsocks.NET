@@ -3,6 +3,27 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <Authors>Shadowsocks.NET</Authors>
+    <Copyright>© 2021 Shadowsocks.NET</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Description>Common Shadowsocks models and utilities.</Description>
+    <PackageProjectUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</RepositoryUrl>
+    <RepositoryType>Public</RepositoryType>
+    <PackageTags>shadowsocks</PackageTags>
+    <PackageIcon>shadowsocks-512px.png</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\icons\shadowsocks-512px.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>

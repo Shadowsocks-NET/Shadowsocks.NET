@@ -4,23 +4,17 @@ using System.Text.Json.Serialization;
 
 namespace Shadowsocks.Interop.SsRust
 {
-    public class Config : IGroup<Server>
+    public class Config : Group
     {
-        /// <inheritdoc/>
-        public int Version { get; set; }
-
-        /// <inheritdoc/>
-        public List<Server> Servers { get; set; }
-
         /// <summary>
         /// Gets or sets the listening address.
         /// </summary>
-        public string LocalAddress { get; set; }
+        public string LocalAddress { get; set; } = "";
 
         /// <summary>
         /// Gets or sets the listening port.
         /// </summary>
-        public int LocalPort { get; set; }
+        public int LocalPort { get; set; } = 1080;
 
         /// <inheritdoc cref="Server.Host"/>
         [JsonPropertyName("server")]
@@ -36,7 +30,7 @@ namespace Shadowsocks.Interop.SsRust
         /// <inheritdoc cref="Server.Method"/>
         public string? Method { get; set; }
 
-        /// <inheritdoc cref="Server.Plugin"/>
+        /// <inheritdoc cref="Server.PluginPath"/>
         public string? Plugin { get; set; }
 
         /// <inheritdoc cref="Server.PluginOpts"/>
@@ -77,7 +71,7 @@ namespace Shadowsocks.Interop.SsRust
         /// Defaults to tcp_only.
         /// Can also be tcp_and_udp or udp_only.
         /// </summary>
-        public string Mode { get; set; }
+        public string Mode { get; set; } = "tcp_only";
 
         /// <summary>
         /// Gets or sets TCP_NODELAY.
@@ -95,15 +89,6 @@ namespace Shadowsocks.Interop.SsRust
         /// Defaults to false.
         /// </summary>
         public bool Ipv6First { get; set; }
-        
-        public Config()
-        {
-            Version = 1;
-            Servers = new();
-            LocalAddress = "";
-            LocalPort = 1080;
-            Mode = "tcp_only";
-        }
 
         /// <summary>
         /// Gets the default configuration for Linux.

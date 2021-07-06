@@ -1,0 +1,24 @@
+name: Publish NuGet Packages
+
+on:
+  push:
+    tags:
+      - 'nuget-v*'
+
+jobs:
+  publish_upload:
+    name: Publish NuGet Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Pack and upload NuGet package
+        run: |
+          dotnet pack Shadowsocks -c Release
+          dotnet pack Shadowsocks.Interop -c Release
+          dotnet pack Shadowsocks.OnlineConfig -c Release
+          dotnet nuget push Shadowsocks/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+          dotnet nuget push Shadowsocks.Interop/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+          dotnet nuget push Shadowsocks.OnlineConfig/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate

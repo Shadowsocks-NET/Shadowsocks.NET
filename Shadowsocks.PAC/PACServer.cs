@@ -1,5 +1,5 @@
 using Shadowsocks.Net;
-using Shadowsocks.Utilities;
+using Shadowsocks.Utils;
 using Shadowsocks.Net.Crypto;
 using Splat;
 using System;

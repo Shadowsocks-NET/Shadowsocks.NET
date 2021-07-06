@@ -1,12 +1,7 @@
 using Shadowsocks.Models;
 using Shadowsocks.Net;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shadowsocks.CLI.Client
 {
@@ -14,8 +9,8 @@ namespace Shadowsocks.CLI.Client
     {
         private TCPListener? _tcpListener;
         private UDPListener? _udpListener;
-        
-        public void Start(string listenSocks, string serverAddress, int serverPort, string method, string password, string? plugin, string? pluginOpts, string? pluginArgs)
+
+        public void Start(string listenSocks, string serverAddress, int serverPort, string method, string password, string? pluginPath, string? pluginOpts, string? pluginArgs)
         {
             var localEP = IPEndPoint.Parse(listenSocks);
             var server = new Server()
@@ -24,14 +19,10 @@ namespace Shadowsocks.CLI.Client
                 Port = serverPort,
                 Method = method,
                 Password = password,
-                Plugin = plugin,
+                PluginPath = pluginPath,
                 PluginOpts = pluginOpts,
+                PluginArgs = pluginArgs,
             };
-            if (!string.IsNullOrEmpty(plugin) && !string.IsNullOrEmpty(pluginArgs))
-            {
-                var processStartInfo = new ProcessStartInfo(plugin, pluginArgs);
-                server.PluginArgs = processStartInfo.ArgumentList.ToList();
-            }
 
             var tcpRelay = new TCPRelay(server);
             _tcpListener = new TCPListener(localEP, new List<IStreamService>()

@@ -12,7 +12,7 @@ namespace Shadowsocks.Tests
         [InlineData("aes-128-gcm", "tK*sk!9N8@86:UVm", "YWVzLTEyOC1nY206dEsqc2shOU44QDg2OlVWbQ")]
         public void Utilities_Base64Url_Encode(string method, string password, string expectedUserinfoBase64url)
         {
-            var userinfoBase64url = Utilities.Base64Url.Encode($"{method}:{password}");
+            var userinfoBase64url = Utils.Base64Url.Encode($"{method}:{password}");
 
             Assert.Equal(expectedUserinfoBase64url, userinfoBase64url);
         }
@@ -23,7 +23,7 @@ namespace Shadowsocks.Tests
         [InlineData("YWVzLTEyOC1nY206dkFBbiY4a1I6JGlBRTQ", "aes-128-gcm:vAAn&8kR:$iAE4")]
         public void Utilities_Base64Url_Decode(string userinfoBase64url, string expectedUserinfo)
         {
-            var userinfo = Utilities.Base64Url.DecodeToString(userinfoBase64url);
+            var userinfo = Utils.Base64Url.DecodeToString(userinfoBase64url);
 
             Assert.Equal(expectedUserinfo, userinfo);
         }
@@ -40,14 +40,14 @@ namespace Shadowsocks.Tests
         [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", "v2ray-plugin", "server;tls;host=github.com", "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com#GitHub")] // fragment + plugin + pluginOpts
         public void Server_ToUrl(string method, string password, string host, int port, string fragment, string? plugin, string? pluginOpts, string expectedSSUri)
         {
-            var server = new Server()
+            IServer server = new Server()
             {
                 Password = password,
                 Method = method,
                 Host = host,
                 Port = port,
                 Name = fragment,
-                Plugin = plugin,
+                PluginPath = plugin,
                 PluginOpts = pluginOpts,
             };
 
@@ -78,12 +78,12 @@ namespace Shadowsocks.Tests
             Assert.Equal(expectedResult, result);
             if (result)
             {
-                Assert.Equal(expectedPassword, server.Password);
+                Assert.Equal(expectedPassword, server!.Password);
                 Assert.Equal(expectedMethod, server.Method);
                 Assert.Equal(expectedHost, server.Host);
                 Assert.Equal(expectedPort, server.Port);
                 Assert.Equal(expectedFragment, server.Name);
-                Assert.Equal(expectedPlugin, server.Plugin);
+                Assert.Equal(expectedPlugin, server.PluginPath);
                 Assert.Equal(expectedPluginOpts, server.PluginOpts);
             }
         }

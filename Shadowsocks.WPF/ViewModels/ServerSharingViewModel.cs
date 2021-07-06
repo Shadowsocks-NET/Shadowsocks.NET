@@ -48,7 +48,7 @@ namespace Shadowsocks.WPF.ViewModels
         private void UpdateUrlAndImage()
         {
             // update SelectedServerUrl
-            SelectedServerUrl = SelectedServer.ToUrl().AbsoluteUri;
+            SelectedServerUrl = SelectedServer.ToIServer().ToUrl().AbsoluteUri;
 
             // generate QR code
             var qrCode = ZXing.QrCode.Internal.Encoder.encode(SelectedServerUrl, ZXing.QrCode.Internal.ErrorCorrectionLevel.L);

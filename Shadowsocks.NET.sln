@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.CLI", "Shadowso
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.Protocol", "Shadowsocks.Protocol\Shadowsocks.Protocol.csproj", "{94DE5045-4D09-437B-BDE3-679FCAF07A2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shadowsocks.OnlineConfig", "Shadowsocks.OnlineConfig\Shadowsocks.OnlineConfig.csproj", "{8BA51CB7-06A2-4FE4-AFE3-0549D1088E8A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{94DE5045-4D09-437B-BDE3-679FCAF07A2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94DE5045-4D09-437B-BDE3-679FCAF07A2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94DE5045-4D09-437B-BDE3-679FCAF07A2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BA51CB7-06A2-4FE4-AFE3-0549D1088E8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BA51CB7-06A2-4FE4-AFE3-0549D1088E8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BA51CB7-06A2-4FE4-AFE3-0549D1088E8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BA51CB7-06A2-4FE4-AFE3-0549D1088E8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

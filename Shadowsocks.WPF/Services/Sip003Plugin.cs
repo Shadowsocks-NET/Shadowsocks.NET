@@ -27,13 +27,13 @@ namespace Shadowsocks.WPF.Services
                 throw new ArgumentNullException(nameof(server));
             }
 
-            if (string.IsNullOrWhiteSpace(server.Plugin))
+            if (string.IsNullOrWhiteSpace(server.PluginPath))
             {
                 return null;
             }
 
             return new Sip003Plugin(
-                server.Plugin,
+                server.PluginPath,
                 server.PluginOpts,
                 server.PluginArgs,
                 server.Host,
@@ -41,26 +41,17 @@ namespace Shadowsocks.WPF.Services
                 showPluginOutput);
         }
 
-        private Sip003Plugin(string plugin, string? pluginOpts, List<string>? pluginArgs, string serverAddress, int serverPort, bool showPluginOutput)
+        private Sip003Plugin(string pluginPath, string? pluginOpts, string? pluginArgs, string serverAddress, int serverPort, bool showPluginOutput)
         {
-            if (plugin == null) throw new ArgumentNullException(nameof(plugin));
-            if (string.IsNullOrWhiteSpace(serverAddress))
-            {
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(serverAddress));
-            }
-            if (serverPort <= 0 || serverPort > 65535)
-            {
-                throw new ArgumentOutOfRangeException(nameof(serverPort));
-            }
-
             var pluginProcessStartInfo = new ProcessStartInfo
             {
-                FileName = plugin,
+                FileName = pluginPath,
                 UseShellExecute = false,
                 CreateNoWindow = !showPluginOutput,
                 ErrorDialog = false,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 WorkingDirectory = Utils.Utilities.WorkingDirectory ?? Environment.CurrentDirectory,
+                Arguments = pluginArgs ?? "",
                 Environment =
                     {
                         ["SS_REMOTE_HOST"] = serverAddress,
@@ -68,9 +59,6 @@ namespace Shadowsocks.WPF.Services
                         ["SS_PLUGIN_OPTIONS"] = pluginOpts
                     }
             };
-            if (pluginArgs != null)
-                foreach (var arg in pluginArgs)
-                    pluginProcessStartInfo.ArgumentList.Add(arg);
 
             _pluginProcess = new Process()
             {

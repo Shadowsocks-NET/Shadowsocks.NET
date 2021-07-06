@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Shadowsocks.Interop.V2Ray.Protocols.Shadowsocks
 {
     public class ServerObject

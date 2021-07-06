@@ -1,12 +1,8 @@
-using Shadowsocks.Models;
 using Splat;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,11 +24,11 @@ namespace Shadowsocks.CLI
             clientCommand.AddOption(new Option<string>("--method", "Encryption method to use for remote Shadowsocks server."));
             clientCommand.AddOption(new Option<string?>("--password", "Password to use for remote Shadowsocks server."));
             clientCommand.AddOption(new Option<string?>("--key", "Encryption key (NOT password!) to use for remote Shadowsocks server."));
-            clientCommand.AddOption(new Option<string?>("--plugin", "Plugin binary path."));
+            clientCommand.AddOption(new Option<string?>("--plugin-path", "Plugin binary path."));
             clientCommand.AddOption(new Option<string?>("--plugin-opts", "Plugin options."));
             clientCommand.AddOption(new Option<string?>("--plugin-args", "Plugin startup arguments."));
             clientCommand.Handler = CommandHandler.Create(
-                async (Backend backend, string? listen, string? listenSocks, string? listenHttp, string serverAddress, int serverPort, string method, string? password, string? key, string? plugin, string? pluginOpts, string? pluginArgs, CancellationToken cancellationToken) =>
+                async (Backend backend, string? listen, string? listenSocks, string? listenHttp, string serverAddress, int serverPort, string method, string? password, string? key, string? pluginPath, string? pluginOpts, string? pluginArgs, CancellationToken cancellationToken) =>
                 {
                     Locator.CurrentMutable.RegisterConstant<ConsoleLogger>(new());
                     if (string.IsNullOrEmpty(listenSocks))
@@ -56,14 +52,14 @@ namespace Shadowsocks.CLI
                             if (!string.IsNullOrEmpty(password))
                             {
                                 legacyClient = new();
-                                legacyClient.Start(listenSocks, serverAddress, serverPort, method, password, plugin, pluginOpts, pluginArgs);
+                                legacyClient.Start(listenSocks, serverAddress, serverPort, method, password, pluginPath, pluginOpts, pluginArgs);
                             }
                             else
                                 LogHost.Default.Error("The legacy backend requires password.");
                             break;
                         case Backend.Pipelines:
                             pipelinesClient = new();
-                            await pipelinesClient.Start(listenSocks, serverAddress, serverPort, method, password, key, plugin, pluginOpts, pluginArgs);
+                            await pipelinesClient.Start(listenSocks, serverAddress, serverPort, method, password, key, pluginPath, pluginOpts, pluginArgs);
                             break;
                         default:
                             LogHost.Default.Error("Not implemented.");
@@ -106,14 +102,17 @@ namespace Shadowsocks.CLI
 
             var convertConfigCommand = new Command("convert-config", "Convert between different config formats. Supported formats: SIP002 links, SIP008 delivery JSON, and V2Ray JSON (outbound only).");
             convertConfigCommand.AddOption(new Option<string[]?>("--from-urls", "URL conversion sources. Multiple URLs are supported. Supported protocols are ss:// and https://."));
+            convertConfigCommand.AddOption(new Option<string[]?>("--from-oocv1-api-tokens", "Open Online Config 1 API token sources. Multiple tokens are supported."));
+            convertConfigCommand.AddOption(new Option<string[]?>("--from-oocv1-json", "Open Online Config 1 JSON conversion sources. Multiple JSON files are supported."));
             convertConfigCommand.AddOption(new Option<string[]?>("--from-sip008-json", "SIP008 JSON conversion sources. Multiple JSON files are supported."));
             convertConfigCommand.AddOption(new Option<string[]?>("--from-v2ray-json", "V2Ray JSON conversion sources. Multiple JSON files are supported."));
             convertConfigCommand.AddOption(new Option<bool>("--prefix-group-name", "Whether to prefix group name to server names after conversion."));
             convertConfigCommand.AddOption(new Option<bool>("--to-urls", "Convert to ss:// links and print."));
-            convertConfigCommand.AddOption(new Option<string?>("--to-sip008-json", "Convert to SIP008 JSON and save to the specified path."));
-            convertConfigCommand.AddOption(new Option<string?>("--to-v2ray-json", "Convert to V2Ray JSON and save to the specified path."));
+            convertConfigCommand.AddOption(new Option<string>("--to-oocv1-json", "Convert to Open Online Config 1 JSON and save to the specified path."));
+            convertConfigCommand.AddOption(new Option<string>("--to-sip008-json", "Convert to SIP008 JSON and save to the specified path."));
+            convertConfigCommand.AddOption(new Option<string>("--to-v2ray-json", "Convert to V2Ray JSON and save to the specified path."));
             convertConfigCommand.Handler = CommandHandler.Create(
-                async (string[]? fromUrls, string[]? fromSip008Json, string[]? fromV2rayJson, bool prefixGroupName, bool toUrls, string? toSip008Json, string? toV2rayJson, CancellationToken cancellationToken) =>
+                async (string[]? fromUrls, string[]? fromOocv1ApiTokens, string[]? fromOocv1Json, string[]? fromSip008Json, string[]? fromV2rayJson, bool prefixGroupName, bool toUrls, string toOocv1Json, string toSip008Json, string toV2rayJson, CancellationToken cancellationToken) =>
                 {
                     var configConverter = new ConfigConverter(prefixGroupName);
 
@@ -131,6 +130,10 @@ namespace Shadowsocks.CLI
                             }
                             await configConverter.FromUrls(uris, cancellationToken);
                         }
+                        if (fromOocv1ApiTokens is not null)
+                            await configConverter.FromOOCv1ApiTokens(fromOocv1ApiTokens, cancellationToken);
+                        if (fromOocv1Json is not null)
+                            await configConverter.FromOOCv1Json(fromOocv1Json, cancellationToken);
                         if (fromSip008Json != null)
                             await configConverter.FromSip008Json(fromSip008Json, cancellationToken);
                         if (fromV2rayJson != null)
@@ -142,6 +145,8 @@ namespace Shadowsocks.CLI
                             foreach (var uri in uris)
                                 Console.WriteLine(uri.AbsoluteUri);
                         }
+                        if (!string.IsNullOrEmpty(toOocv1Json))
+                            await configConverter.ToOOCv1Json(toOocv1Json, cancellationToken);
                         if (!string.IsNullOrEmpty(toSip008Json))
                             await configConverter.ToSip008Json(toSip008Json, cancellationToken);
                         if (!string.IsNullOrEmpty(toV2rayJson))
