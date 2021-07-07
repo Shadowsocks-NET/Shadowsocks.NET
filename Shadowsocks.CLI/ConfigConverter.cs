@@ -120,7 +120,7 @@ namespace Shadowsocks.CLI
         {
             foreach (var path in paths)
             {
-                using var jsonFile = new FileStream(path, FileMode.Open);
+                await using var jsonFile = new FileStream(path, FileMode.Open);
                 var config = await JsonSerializer.DeserializeAsync<OOCConfigShadowsocks>(jsonFile, JsonHelper.camelCaseJsonDeserializerOptions, cancellationToken);
                 if (config != null)
                 {
@@ -139,7 +139,7 @@ namespace Shadowsocks.CLI
         {
             foreach (var path in paths)
             {
-                using var jsonFile = new FileStream(path, FileMode.Open);
+                await using var jsonFile = new FileStream(path, FileMode.Open);
                 var config = await JsonSerializer.DeserializeAsync<SIP008Config>(jsonFile, JsonHelper.snakeCaseJsonDeserializerOptions, cancellationToken);
                 if (config != null)
                 {
@@ -158,7 +158,7 @@ namespace Shadowsocks.CLI
         {
             foreach (var path in paths)
             {
-                using var jsonFile = new FileStream(path, FileMode.Open);
+                await using var jsonFile = new FileStream(path, FileMode.Open);
                 var v2rayConfig = await JsonSerializer.DeserializeAsync<Interop.V2Ray.Config>(jsonFile, JsonHelper.camelCaseJsonDeserializerOptions, cancellationToken);
                 if (v2rayConfig?.Outbounds != null)
                 {
@@ -210,7 +210,7 @@ namespace Shadowsocks.CLI
         /// <param name="path">JSON file path.</param>
         /// <param name="cancellationToken">A token that may be used to cancel the write operation.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public Task ToOOCv1Json(string path, CancellationToken cancellationToken = default)
+        public async Task ToOOCv1Json(string path, CancellationToken cancellationToken = default)
         {
             var config = new OOCConfigShadowsocks();
             foreach (var server in Servers)
@@ -220,8 +220,8 @@ namespace Shadowsocks.CLI
             var directoryPath = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("Invalid path", nameof(path));
             Directory.CreateDirectory(directoryPath);
 
-            using var jsonFile = new FileStream(fullPath, FileMode.Create);
-            return JsonSerializer.SerializeAsync(jsonFile, config, JsonHelper.camelCaseJsonSerializerOptions, cancellationToken);
+            await using var jsonFile = new FileStream(fullPath, FileMode.Create);
+            await JsonSerializer.SerializeAsync(jsonFile, config, JsonHelper.camelCaseJsonSerializerOptions, cancellationToken);
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace Shadowsocks.CLI
         /// <param name="path">JSON file path.</param>
         /// <param name="cancellationToken">A token that may be used to cancel the write operation.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public Task ToSip008Json(string path, CancellationToken cancellationToken = default)
+        public async Task ToSip008Json(string path, CancellationToken cancellationToken = default)
         {
             var config = new SIP008Config();
             foreach (var server in Servers)
@@ -240,8 +240,8 @@ namespace Shadowsocks.CLI
             var directoryPath = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("Invalid path", nameof(path));
             Directory.CreateDirectory(directoryPath);
 
-            using var jsonFile = new FileStream(fullPath, FileMode.Create);
-            return JsonSerializer.SerializeAsync(jsonFile, config, JsonHelper.snakeCaseJsonSerializerOptions, cancellationToken);
+            await using var jsonFile = new FileStream(fullPath, FileMode.Create);
+            await JsonSerializer.SerializeAsync(jsonFile, config, JsonHelper.snakeCaseJsonSerializerOptions, cancellationToken);
         }
 
         /// <summary>
@@ -251,7 +251,7 @@ namespace Shadowsocks.CLI
         /// <param name="prefixGroupName">Whether to prefix group name to server names.</param>
         /// <param name="cancellationToken">A token that may be used to cancel the write operation.</param>
         /// <returns>A task that represents the asynchronous write operation.</returns>
-        public Task ToV2rayJson(string path, CancellationToken cancellationToken = default)
+        public async Task ToV2rayJson(string path, CancellationToken cancellationToken = default)
         {
             var v2rayConfig = new Interop.V2Ray.Config
             {
@@ -279,8 +279,8 @@ namespace Shadowsocks.CLI
             var fullPath = Path.GetFullPath(path);
             var directoryPath = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("Invalid path", nameof(path));
             Directory.CreateDirectory(directoryPath);
-            using var jsonFile = new FileStream(fullPath, FileMode.Create);
-            return JsonSerializer.SerializeAsync(jsonFile, v2rayConfig, JsonHelper.camelCaseJsonSerializerOptions, cancellationToken);
+            await using var jsonFile = new FileStream(fullPath, FileMode.Create);
+            await JsonSerializer.SerializeAsync(jsonFile, v2rayConfig, JsonHelper.camelCaseJsonSerializerOptions, cancellationToken);
         }
     }
 }
