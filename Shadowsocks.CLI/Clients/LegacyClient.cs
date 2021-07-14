@@ -3,16 +3,15 @@ using Shadowsocks.Net;
 using System.Collections.Generic;
 using System.Net;
 
-namespace Shadowsocks.CLI.Client
+namespace Shadowsocks.CLI.Clients
 {
-    public class Legacy
+    public class LegacyClient
     {
         private TCPListener? _tcpListener;
         private UDPListener? _udpListener;
 
-        public void Start(string listenSocks, string serverAddress, int serverPort, string method, string password, string? pluginPath, string? pluginOpts, string? pluginArgs)
+        public void Start(IPEndPoint listenSocks, string serverAddress, int serverPort, string method, string password, string? pluginPath, string? pluginOpts, string? pluginArgs)
         {
-            var localEP = IPEndPoint.Parse(listenSocks);
             var server = new Server()
             {
                 Host = serverAddress,
@@ -25,14 +24,14 @@ namespace Shadowsocks.CLI.Client
             };
 
             var tcpRelay = new TCPRelay(server);
-            _tcpListener = new TCPListener(localEP, new List<IStreamService>()
+            _tcpListener = new TCPListener(listenSocks, new List<IStreamService>()
                         {
                             tcpRelay,
                         });
             _tcpListener.Start();
 
             var udpRelay = new UDPRelay(server);
-            _udpListener = new UDPListener(localEP, new List<IDatagramService>()
+            _udpListener = new UDPListener(listenSocks, new List<IDatagramService>()
                         {
                             udpRelay,
                         });

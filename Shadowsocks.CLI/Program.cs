@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,92 +14,50 @@ namespace Shadowsocks.CLI
     {
         private static Task<int> Main(string[] args)
         {
+            Locator.CurrentMutable.RegisterConstant<ILogger>(new ConsoleLogger());
+
+            var backendOption = new Option<Backend>("--backend", "Shadowsocks backend to use. Available backends: shadowsocks-rust, v2ray, legacy, pipelines.");
+            var listenOption = new Option<IPEndPoint?>("--listen", Parsers.ParseIPEndPoint, false, "Address and port to listen on for both SOCKS5 and HTTP proxy.");
+            var listenSocksOption = new Option<IPEndPoint?>("--listen-socks", Parsers.ParseIPEndPoint, false, "Address and port to listen on for SOCKS5 proxy.");
+            var listenHttpOption = new Option<IPEndPoint?>("--listen-http", Parsers.ParseIPEndPoint, false, "Address and port to listen on for HTTP proxy.");
+            var serverAddressOption = new Option<string>("--server-address", "Address of the remote Shadowsocks server to connect to.")
+            {
+                Arity = ArgumentArity.ExactlyOne,
+            };
+            var serverPortOption = new Option<int>("--server-port", Parsers.ParsePortNumber, false, "Port of the remote Shadowsocks server to connect to.")
+            {
+                Arity = ArgumentArity.ExactlyOne,
+            };
+            var methodOption = new Option<string>("--method", "Encryption method to use for remote Shadowsocks server.")
+            {
+                Arity = ArgumentArity.ExactlyOne,
+            };
+            var passwordOption = new Option<string>("--password", "Password to use for remote Shadowsocks server.");
+            var keyOption = new Option<string>("--key", "Encryption key (NOT password!) to use for remote Shadowsocks server.");
+            var pluginPathOption = new Option<string>("--plugin-path", "Plugin binary path.");
+            var pluginOptsOption = new Option<string>("--plugin-opts", "Plugin options.");
+            var pluginArgsOption = new Option<string>("--plugin-args", "Plugin startup arguments.");
+
             var clientCommand = new Command("client", "Shadowsocks client.");
             clientCommand.AddAlias("c");
-            clientCommand.AddOption(new Option<Backend>("--backend", "Shadowsocks backend to use. Available backends: shadowsocks-rust, v2ray, legacy, pipelines."));
-            clientCommand.AddOption(new Option<string?>("--listen", "Address and port to listen on for both SOCKS5 and HTTP proxy."));
-            clientCommand.AddOption(new Option<string?>("--listen-socks", "Address and port to listen on for SOCKS5 proxy."));
-            clientCommand.AddOption(new Option<string?>("--listen-http", "Address and port to listen on for HTTP proxy."));
-            clientCommand.AddOption(new Option<string>("--server-address", "Address of the remote Shadowsocks server to connect to."));
-            clientCommand.AddOption(new Option<int>("--server-port", "Port of the remote Shadowsocks server to connect to."));
-            clientCommand.AddOption(new Option<string>("--method", "Encryption method to use for remote Shadowsocks server."));
-            clientCommand.AddOption(new Option<string?>("--password", "Password to use for remote Shadowsocks server."));
-            clientCommand.AddOption(new Option<string?>("--key", "Encryption key (NOT password!) to use for remote Shadowsocks server."));
-            clientCommand.AddOption(new Option<string?>("--plugin-path", "Plugin binary path."));
-            clientCommand.AddOption(new Option<string?>("--plugin-opts", "Plugin options."));
-            clientCommand.AddOption(new Option<string?>("--plugin-args", "Plugin startup arguments."));
-            clientCommand.Handler = CommandHandler.Create(
-                async (Backend backend, string? listen, string? listenSocks, string? listenHttp, string serverAddress, int serverPort, string method, string? password, string? key, string? pluginPath, string? pluginOpts, string? pluginArgs, CancellationToken cancellationToken) =>
-                {
-                    Locator.CurrentMutable.RegisterConstant<ConsoleLogger>(new());
-                    if (string.IsNullOrEmpty(listenSocks))
-                    {
-                        LogHost.Default.Error("You must specify SOCKS5 listen address and port.");
-                        return;
-                    }
-
-                    Client.Legacy? legacyClient = null;
-                    Client.Pipelines? pipelinesClient = null;
-
-                    switch (backend)
-                    {
-                        case Backend.SsRust:
-                            LogHost.Default.Error("Not implemented.");
-                            break;
-                        case Backend.V2Ray:
-                            LogHost.Default.Error("Not implemented.");
-                            break;
-                        case Backend.Legacy:
-                            if (!string.IsNullOrEmpty(password))
-                            {
-                                legacyClient = new();
-                                legacyClient.Start(listenSocks, serverAddress, serverPort, method, password, pluginPath, pluginOpts, pluginArgs);
-                            }
-                            else
-                                LogHost.Default.Error("The legacy backend requires password.");
-                            break;
-                        case Backend.Pipelines:
-                            pipelinesClient = new();
-                            await pipelinesClient.Start(listenSocks, serverAddress, serverPort, method, password, key, pluginPath, pluginOpts, pluginArgs);
-                            break;
-                        default:
-                            LogHost.Default.Error("Not implemented.");
-                            break;
-                    }
-
-                    while (!cancellationToken.IsCancellationRequested)
-                    {
-                        await Task.Delay(TimeSpan.FromHours(1.00), cancellationToken);
-                        Console.WriteLine("An hour has passed.");
-                    }
-
-                    switch (backend)
-                    {
-                        case Backend.SsRust:
-                            LogHost.Default.Error("Not implemented.");
-                            break;
-                        case Backend.V2Ray:
-                            LogHost.Default.Error("Not implemented.");
-                            break;
-                        case Backend.Legacy:
-                            legacyClient?.Stop();
-                            break;
-                        case Backend.Pipelines:
-                            pipelinesClient?.Stop();
-                            break;
-                        default:
-                            LogHost.Default.Error("Not implemented.");
-                            break;
-                    }
-                });
+            clientCommand.AddOption(backendOption);
+            clientCommand.AddOption(listenOption);
+            clientCommand.AddOption(listenSocksOption);
+            clientCommand.AddOption(listenHttpOption);
+            clientCommand.AddOption(serverAddressOption);
+            clientCommand.AddOption(serverPortOption);
+            clientCommand.AddOption(methodOption);
+            clientCommand.AddOption(passwordOption);
+            clientCommand.AddOption(keyOption);
+            clientCommand.AddOption(pluginPathOption);
+            clientCommand.AddOption(pluginOptsOption);
+            clientCommand.AddOption(pluginArgsOption);
+            clientCommand.AddValidator(ClientCommand.ValidateClientCommand);
+            clientCommand.Handler = CommandHandler.Create<Backend, IPEndPoint?, IPEndPoint?, IPEndPoint?, string, int, string, string, string, string, string, string, CancellationToken>(ClientCommand.RunClientAsync);
 
             var serverCommand = new Command("server", "Shadowsocks server.");
             serverCommand.AddAlias("s");
-            serverCommand.Handler = CommandHandler.Create(
-                () =>
-                {
-                    Console.WriteLine("Not implemented.");
-                });
+            serverCommand.Handler = CommandHandler.Create(() => LogHost.Default.Error("Not implemented."));
 
             var convertConfigCommand = new Command("convert-config", "Convert between different config formats. Supported formats: SIP002 links, SIP008 delivery JSON, and V2Ray JSON (outbound only).");
             convertConfigCommand.AddOption(new Option<string[]?>("--from-urls", "URL conversion sources. Multiple URLs are supported. Supported protocols are ss:// and https://."));

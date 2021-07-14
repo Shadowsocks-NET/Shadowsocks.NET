@@ -3,22 +3,21 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.CLI.Client
+namespace Shadowsocks.CLI.Clients
 {
-    public class Pipelines
+    public class PipelinesClient
     {
         private TcpPipeListener? _tcpPipeListener;
 
-        public Task Start(string listenSocks, string serverAddress, int serverPort, string method, string? password, string? key, string? plugin, string? pluginOpts, string? pluginArgs)
+        public Task Start(IPEndPoint listenSocks, string serverAddress, int serverPort, string method, string? password, string? key, string? plugin, string? pluginOpts, string? pluginArgs)
         {
             // TODO
-            var localEP = IPEndPoint.Parse(listenSocks);
             var remoteEp = new DnsEndPoint(serverAddress, serverPort);
             byte[]? mainKey = null;
             if (!string.IsNullOrEmpty(key))
                 mainKey = Encoding.UTF8.GetBytes(key);
-            _tcpPipeListener = new(localEP);
-            return _tcpPipeListener.Start(localEP, remoteEp, method, password, mainKey);
+            _tcpPipeListener = new(listenSocks);
+            return _tcpPipeListener.Start(listenSocks, remoteEp, method, password, mainKey);
         }
 
         public void Stop() => _tcpPipeListener?.Stop();
