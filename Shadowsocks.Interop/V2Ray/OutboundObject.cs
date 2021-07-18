@@ -59,6 +59,7 @@ namespace Shadowsocks.Interop.V2Ray
         /// <summary>
         /// Gets the <see cref="OutboundObject"/> for the Trojan server.
         /// </summary>
+        /// <param name="name"></param>
         /// <param name="address"></param>
         /// <param name="port"></param>
         /// <param name="password"></param>
