@@ -1,7 +1,7 @@
 #nullable enable
-using CryptoBase;
 using CryptoBase.Abstractions.SymmetricCryptos;
 using CryptoBase.Digests.MD5;
+using CryptoBase.SymmetricCryptos.StreamCryptos;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
