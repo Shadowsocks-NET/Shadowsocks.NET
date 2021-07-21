@@ -33,10 +33,10 @@ namespace Shadowsocks.Interop.SsRust
         /// <inheritdoc cref="Server.PluginPath"/>
         public string? Plugin { get; set; }
 
-        /// <inheritdoc cref="Server.PluginOpts"/>
+        /// <inheritdoc cref="Server.PluginOptions"/>
         public string? PluginOpts { get; set; }
 
-        /// <inheritdoc cref="Server.PluginArgs"/>
+        /// <inheritdoc cref="Server.PluginArguments"/>
         public List<string>? PluginArgs { get; set; }
 
         /// <summary>

@@ -34,8 +34,8 @@ namespace Shadowsocks.WPF.Services
 
             return new Sip003Plugin(
                 server.PluginPath,
-                server.PluginOpts,
-                server.PluginArgs,
+                server.PluginOptions,
+                server.PluginArguments,
                 server.Host,
                 server.Port,
                 showPluginOutput);

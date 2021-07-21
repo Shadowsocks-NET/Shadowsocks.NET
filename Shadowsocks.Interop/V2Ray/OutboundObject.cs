@@ -45,7 +45,7 @@ namespace Shadowsocks.Interop.V2Ray
         /// <returns></returns>
         public static OutboundObject GetShadowsocks(IServer server)
         {
-            if (!string.IsNullOrEmpty(server.PluginPath))
+            if (!string.IsNullOrEmpty(server.PluginName))
                 throw new InvalidOperationException("V2Ray doesn't support SIP003 plugins.");
 
             return new()

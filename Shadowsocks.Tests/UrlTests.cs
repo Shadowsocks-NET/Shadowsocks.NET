@@ -1,5 +1,4 @@
 using Shadowsocks.Models;
-using System;
 using Xunit;
 
 namespace Shadowsocks.Tests
@@ -16,7 +15,7 @@ namespace Shadowsocks.Tests
 
             Assert.Equal(expectedUserinfoBase64url, userinfoBase64url);
         }
- 
+
         [Theory]
         [InlineData("Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTo2JW04RDlhTUI1YkElYTQl", "chacha20-ietf-poly1305:6%m8D9aMB5bA%a4%")]
         [InlineData("YWVzLTI1Ni1nY206YnBOZ2sqSjNrYUFZeXhIRQ", "aes-256-gcm:bpNgk*J3kaAYyxHE")]
@@ -29,16 +28,22 @@ namespace Shadowsocks.Tests
         }
 
         [Theory]
-        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/")] // domain name
-        [InlineData("aes-256-gcm", "wLhN2STZ", "1.1.1.1", 853, "", null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@1.1.1.1:853/")] // IPv4
-        [InlineData("aes-256-gcm", "wLhN2STZ", "2001:db8:85a3::8a2e:370:7334", 8388, "", null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@[2001:db8:85a3::8a2e:370:7334]:8388/")] // IPv6
-        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/#GitHub")] // fragment
-        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "👩‍💻", null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/#%F0%9F%91%A9%E2%80%8D%F0%9F%92%BB")] // fragment
-        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin")] // plugin
-        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, "server;tls;host=github.com", "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/")] // pluginOpts
-        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", "server;tls;host=github.com", "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com")] // plugin + pluginOpts
-        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", "v2ray-plugin", "server;tls;host=github.com", "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com#GitHub")] // fragment + plugin + pluginOpts
-        public void Server_ToUrl(string method, string password, string host, int port, string fragment, string? plugin, string? pluginOpts, string expectedSSUri)
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, null, null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/")] // domain name
+        [InlineData("aes-256-gcm", "wLhN2STZ", "1.1.1.1", 853, "", null, null, null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@1.1.1.1:853/")] // IPv4
+        [InlineData("aes-256-gcm", "wLhN2STZ", "2001:db8:85a3::8a2e:370:7334", 8388, "", null, null, null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@[2001:db8:85a3::8a2e:370:7334]:8388/")] // IPv6
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", null, null, null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/#GitHub")] // fragment
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "👩‍💻", null, null, null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/#%F0%9F%91%A9%E2%80%8D%F0%9F%92%BB")] // fragment
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", null, null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin")] // pluginName
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, "1.0", null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/")] // pluginVersion
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, null, "server;tls;host=github.com", null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/")] // pluginOptions
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, null, null, "-vvvvvv", "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/")] // pluginArguments
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", "1.0", null, null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin&pluginVersion=1.0")] // pluginName + pluginVersion
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", null, "server;tls;host=github.com", null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com")] // pluginName + pluginOptions
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", null, null, "-vvvvvv", "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin&pluginArguments=-vvvvvv")] // pluginName + pluginArguments
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", "1.0", "server;tls;host=github.com", null, "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com&pluginVersion=1.0")] // pluginName + pluginVersion + pluginOptions
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", "1.0", null, "-vvvvvv", "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin&pluginVersion=1.0&pluginArguments=-vvvvvv")] // pluginName + pluginVersion + pluginArguments
+        [InlineData("aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", "v2ray-plugin", "1.0", "server;tls;host=github.com", "-vvvvvv", "ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com&pluginVersion=1.0&pluginArguments=-vvvvvv#GitHub")] // fragment + pluginName + pluginVersion + pluginOptions + pluginArguments
+        public void Server_ToUrl(string method, string password, string host, int port, string fragment, string? pluginName, string? pluginVersion, string? pluginOptions, string? pluginArguments, string expectedSSUri)
         {
             IServer server = new Server()
             {
@@ -47,8 +52,10 @@ namespace Shadowsocks.Tests
                 Host = host,
                 Port = port,
                 Name = fragment,
-                PluginPath = plugin,
-                PluginOpts = pluginOpts,
+                PluginName = pluginName,
+                PluginVersion = pluginVersion,
+                PluginOptions = pluginOptions,
+                PluginArguments = pluginArguments,
             };
 
             var ssUriString = server.ToUrl().AbsoluteUri;
@@ -57,21 +64,27 @@ namespace Shadowsocks.Tests
         }
 
         [Theory]
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, null)] // domain name
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@1.1.1.1:853/", true, "aes-256-gcm", "wLhN2STZ", "1.1.1.1", 853, "", null, null)] // IPv4
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@[2001:db8:85a3::8a2e:370:7334]:8388/", true, "aes-256-gcm", "wLhN2STZ", "2001:db8:85a3::8a2e:370:7334", 8388, "", null, null)] // IPv6
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/#GitHub", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", null, null)] // fragment
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/#%F0%9F%91%A9%E2%80%8D%F0%9F%92%BB", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "👩‍💻", null, null)] // fragment
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", null)] // plugin
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", "server;tls;host=github.com")] // plugin + pluginOpts
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com#GitHub", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", "v2ray-plugin", "server;tls;host=github.com")] // fragment + plugin + pluginOpts
-        [InlineData("ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTo2JW04RDlhTUI1YkElYTQl@github.com:443/", true, "chacha20-ietf-poly1305", "6%m8D9aMB5bA%a4%", "github.com", 443, "", null, null)] // userinfo parsing
-        [InlineData("ss://YWVzLTI1Ni1nY206YnBOZ2sqSjNrYUFZeXhIRQ@github.com:443/", true, "aes-256-gcm", "bpNgk*J3kaAYyxHE", "github.com", 443, "", null, null)] // userinfo parsing
-        [InlineData("ss://YWVzLTEyOC1nY206dkFBbiY4a1I6JGlBRTQ@github.com:443/", true, "aes-128-gcm", "vAAn&8kR:$iAE4", "github.com", 443, "", null, null)] // userinfo parsing
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFpAZ2l0aHViLmNvbTo0NDM", false, "", "", "", 0, "", null, null)] // unsupported legacy URL
-        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFpAZ2l0aHViLmNvbTo0NDM#some-legacy-url", false, "", "", "", 0, "", null, null)] // unsupported legacy URL with fragment
-        [InlineData("https://github.com/", false, "", "", "", 0, "", null, null)] // non-Shadowsocks URL
-        public void Server_TryParse(string ssUrl, bool expectedResult, string expectedMethod, string expectedPassword, string expectedHost, int expectedPort, string expectedFragment, string? expectedPlugin, string? expectedPluginOpts)
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, null, null, null)] // domain name
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@1.1.1.1:853/", true, "aes-256-gcm", "wLhN2STZ", "1.1.1.1", 853, "", null, null, null, null)] // IPv4
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@[2001:db8:85a3::8a2e:370:7334]:8388/", true, "aes-256-gcm", "wLhN2STZ", "2001:db8:85a3::8a2e:370:7334", 8388, "", null, null, null, null)] // IPv6
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/#GitHub", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", null, null, null, null)] // fragment
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/#%F0%9F%91%A9%E2%80%8D%F0%9F%92%BB", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "👩‍💻", null, null, null, null)] // fragment
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", null, null, null)] // pluginName
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?pluginVersion=1.0", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, null, null, null)] // pluginVersion
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?pluginArguments=-vvvvvv", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", null, null, null, null)] // pluginArguments
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin&pluginVersion=1.0", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", "1.0", null, null)] // pluginName + pluginVersion
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", null, "server;tls;host=github.com", null)] // pluginName + pluginOptions
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin&pluginArguments=-vvvvvv", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", null, null, "-vvvvvv")] // pluginName + pluginArguments
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com&pluginVersion=1.0", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", "1.0", "server;tls;host=github.com", null)] // pluginName + pluginVersion + pluginOptions
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin&pluginVersion=1.0&pluginArguments=-vvvvvv", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "", "v2ray-plugin", "1.0", null, "-vvvvvv")] // pluginName + pluginVersion + pluginArguments
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFo@github.com:443/?plugin=v2ray-plugin%3Bserver%3Btls%3Bhost%3Dgithub.com&pluginVersion=1.0&pluginArguments=-vvvvvv#GitHub", true, "aes-256-gcm", "wLhN2STZ", "github.com", 443, "GitHub", "v2ray-plugin", "1.0", "server;tls;host=github.com", "-vvvvvv")] // fragment + pluginName + pluginVersion + pluginOptions + pluginArguments
+        [InlineData("ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTo2JW04RDlhTUI1YkElYTQl@github.com:443/", true, "chacha20-ietf-poly1305", "6%m8D9aMB5bA%a4%", "github.com", 443, "", null, null, null, null)] // userinfo parsing
+        [InlineData("ss://YWVzLTI1Ni1nY206YnBOZ2sqSjNrYUFZeXhIRQ@github.com:443/", true, "aes-256-gcm", "bpNgk*J3kaAYyxHE", "github.com", 443, "", null, null, null, null)] // userinfo parsing
+        [InlineData("ss://YWVzLTEyOC1nY206dkFBbiY4a1I6JGlBRTQ@github.com:443/", true, "aes-128-gcm", "vAAn&8kR:$iAE4", "github.com", 443, "", null, null, null, null)] // userinfo parsing
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFpAZ2l0aHViLmNvbTo0NDM", false, "", "", "", 0, "", null, null, null, null)] // unsupported legacy URL
+        [InlineData("ss://YWVzLTI1Ni1nY206d0xoTjJTVFpAZ2l0aHViLmNvbTo0NDM#some-legacy-url", false, "", "", "", 0, "", null, null, null, null)] // unsupported legacy URL with fragment
+        [InlineData("https://github.com/", false, "", "", "", 0, "", null, null, null, null)] // non-Shadowsocks URL
+        public void Server_TryParse(string ssUrl, bool expectedResult, string expectedMethod, string expectedPassword, string expectedHost, int expectedPort, string expectedFragment, string? expectedPluginName, string? expectedPluginVersion, string? expectedPluginOptions, string? expectedPluginArguments)
         {
             var result = Server.TryParse(ssUrl, out var server);
 
@@ -83,9 +96,11 @@ namespace Shadowsocks.Tests
                 Assert.Equal(expectedHost, server.Host);
                 Assert.Equal(expectedPort, server.Port);
                 Assert.Equal(expectedFragment, server.Name);
-                Assert.Equal(expectedPlugin, server.PluginPath);
-                Assert.Equal(expectedPluginOpts, server.PluginOpts);
+                Assert.Equal(expectedPluginName, server.PluginName);
+                Assert.Equal(expectedPluginVersion, server.PluginVersion);
+                Assert.Equal(expectedPluginOptions, server.PluginOptions);
+                Assert.Equal(expectedPluginArguments, server.PluginArguments);
             }
         }
-   }
+    }
 }

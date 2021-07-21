@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Shadowsocks.Models
@@ -36,22 +37,32 @@ namespace Shadowsocks.Models
         public string Password { get; set; }
 
         /// <summary>
-        /// Gets or sets the plugin executable path.
+        /// Gets or sets the plugin name.
+        /// Null when not using a plugin.
         /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string? PluginPath { get; set; }
+        public string? PluginName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the required plugin version string.
+        /// Null when not using a plugin.
+        /// </summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public string? PluginVersion { get; set; }
 
         /// <summary>
         /// Gets or sets the plugin options passed as environment variable SS_PLUGIN_OPTIONS.
+        /// Null when not using a plugin.
         /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string? PluginOpts { get; set; }
+        public string? PluginOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the plugin startup arguments.
+        /// Null when not using a plugin.
         /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string? PluginArgs { get; set; }
+        public string? PluginArguments { get; set; }
 
         public IServer ToIServer();
 
@@ -67,16 +78,31 @@ namespace Shadowsocks.Models
                 Fragment = Name,
             };
 
-            if (!string.IsNullOrEmpty(PluginPath))
+            if (!string.IsNullOrEmpty(PluginName))
             {
-                if (!string.IsNullOrEmpty(PluginOpts))
+                var querySB = new StringBuilder("plugin=");
+
+                querySB.Append(Uri.EscapeDataString(PluginName));
+
+                if (!string.IsNullOrEmpty(PluginOptions))
                 {
-                    uriBuilder.Query = $"plugin={Uri.EscapeDataString($"{PluginPath};{PluginOpts}")}"; // manually escape as a workaround
+                    querySB.Append("%3B"); // URI-escaped ';'
+                    querySB.Append(Uri.EscapeDataString(PluginOptions));
                 }
-                else
+
+                if (!string.IsNullOrEmpty(PluginVersion))
                 {
-                    uriBuilder.Query = $"plugin={PluginPath}";
+                    querySB.Append("&pluginVersion=");
+                    querySB.Append(Uri.EscapeDataString(PluginVersion));
                 }
+
+                if (!string.IsNullOrEmpty(PluginArguments))
+                {
+                    querySB.Append("&pluginArguments=");
+                    querySB.Append(Uri.EscapeDataString(PluginArguments));
+                }
+
+                uriBuilder.Query = querySB.ToString();
             }
 
             return uriBuilder.Uri;

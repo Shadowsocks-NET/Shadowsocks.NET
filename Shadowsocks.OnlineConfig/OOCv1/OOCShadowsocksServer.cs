@@ -1,6 +1,5 @@
 using Shadowsocks.Models;
 using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Shadowsocks.OnlineConfig.OOCv1
@@ -27,13 +26,16 @@ namespace Shadowsocks.OnlineConfig.OOCv1
         public string Password { get; set; } = "";
 
         /// <inheritdoc/>
-        public string? PluginPath { get; set; }
+        public string? PluginName { get; set; }
 
         /// <inheritdoc/>
-        public string? PluginOpts { get; set; }
+        public string? PluginVersion { get; set; }
 
         /// <inheritdoc/>
-        public string? PluginArgs { get; set; }
+        public string? PluginOptions { get; set; }
+
+        /// <inheritdoc/>
+        public string? PluginArguments { get; set; }
 
         public OOCShadowsocksServer()
         {
@@ -47,9 +49,10 @@ namespace Shadowsocks.OnlineConfig.OOCv1
             Port = server.Port;
             Method = server.Method;
             Password = server.Password;
-            PluginPath = server.PluginPath;
-            PluginOpts = server.PluginOpts;
-            PluginArgs = server.PluginArgs;
+            PluginName = server.PluginName;
+            PluginVersion = server.PluginVersion;
+            PluginOptions = server.PluginOptions;
+            PluginArguments = server.PluginArguments;
         }
 
         public IServer ToIServer() => this;

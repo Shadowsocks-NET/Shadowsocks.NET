@@ -1,6 +1,5 @@
 using Shadowsocks.Models;
 using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Shadowsocks.OnlineConfig.SIP008
@@ -30,13 +29,18 @@ namespace Shadowsocks.OnlineConfig.SIP008
 
         /// <inheritdoc/>
         [JsonPropertyName("plugin")]
-        public string? PluginPath { get; set; }
+        public string? PluginName { get; set; }
 
         /// <inheritdoc/>
-        public string? PluginOpts { get; set; }
+        public string? PluginVersion { get; set; }
 
         /// <inheritdoc/>
-        public string? PluginArgs { get; set; }
+        [JsonPropertyName("plugin_opts")]
+        public string? PluginOptions { get; set; }
+
+        /// <inheritdoc/>
+        [JsonPropertyName("plugin_args")]
+        public string? PluginArguments { get; set; }
 
         public SIP008Server()
         {
@@ -50,9 +54,10 @@ namespace Shadowsocks.OnlineConfig.SIP008
             Port = server.Port;
             Method = server.Method;
             Password = server.Password;
-            PluginPath = server.PluginPath;
-            PluginOpts = server.PluginOpts;
-            PluginArgs = server.PluginArgs;
+            PluginName = server.PluginName;
+            PluginVersion = server.PluginVersion;
+            PluginOptions = server.PluginOptions;
+            PluginArguments = server.PluginArguments;
         }
 
         public IServer ToIServer() => this;

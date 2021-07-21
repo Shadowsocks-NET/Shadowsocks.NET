@@ -6,53 +6,47 @@ namespace Shadowsocks.Models
 {
     public class Server : IEquatable<Server>, IServer
     {
-        /// <summary>
-        /// Gets or sets the server ID.
-        /// </summary>
+        /// <inheritdoc/>
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        /// <summary>
-        /// Gets or sets the server name.
-        /// </summary>
+        /// <inheritdoc/>
         public string Name { get; set; } = "";
 
-        /// <summary>
-        /// Gets or sets the server address.
-        /// </summary>
+        /// <inheritdoc/>
         public string Host { get; set; } = "";
 
-        /// <summary>
-        /// Gets or sets the server port.
-        /// </summary>
+        /// <inheritdoc/>
         public int Port { get; set; }
 
-        /// <summary>
-        /// Gets or sets the method used for the server.
-        /// </summary>
+        /// <inheritdoc/>
         public string Method { get; set; } = "chacha20-ietf-poly1305";
 
-        /// <summary>
-        /// Gets or sets the password for the server.
-        /// </summary>
+        /// <inheritdoc/>
         public string Password { get; set; } = "";
+
+        /// <inheritdoc/>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public string? PluginName { get; set; }
+
+        /// <inheritdoc/>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public string? PluginVersion { get; set; }
 
         /// <summary>
         /// Gets or sets the plugin executable path.
+        /// Null when not using a plugin.
         /// </summary>
+        [Obsolete("Use PluginName and PluginVersion to resolve plugin instead.")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? PluginPath { get; set; }
 
-        /// <summary>
-        /// Gets or sets the plugin options passed as environment variable SS_PLUGIN_OPTIONS.
-        /// </summary>
+        /// <inheritdoc/>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string? PluginOpts { get; set; }
+        public string? PluginOptions { get; set; }
 
-        /// <summary>
-        /// Gets or sets the plugin startup arguments.
-        /// </summary>
+        /// <inheritdoc/>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string? PluginArgs { get; set; }
+        public string? PluginArguments { get; set; }
 
         public Server()
         {
@@ -66,9 +60,10 @@ namespace Shadowsocks.Models
             Port = server.Port;
             Method = server.Method;
             Password = server.Password;
-            PluginPath = server.PluginPath;
-            PluginOpts = server.PluginOpts;
-            PluginArgs = server.PluginArgs;
+            PluginName = server.PluginName;
+            PluginVersion = server.PluginVersion;
+            PluginOptions = server.PluginOptions;
+            PluginArguments = server.PluginArguments;
         }
 
         public bool Equals(Server? other) => Id == other?.Id;
@@ -131,31 +126,47 @@ namespace Shadowsocks.Models
 
                 // find the plugin query
                 var parsedQueriesArray = uri.Query.Split('?', '&');
-                var pluginQueryContent = "";
+
+                string? pluginQueryContent = null;
+                string? pluginVersion = null;
+                string? pluginArguments = null;
 
                 foreach (var query in parsedQueriesArray)
                 {
                     if (query.StartsWith("plugin=") && query.Length > 7)
                     {
-                        pluginQueryContent = query[7..]; // remove "plugin="
+                        pluginQueryContent = Uri.UnescapeDataString(query[7..]); // remove "plugin=" and unescape
+                    }
+
+                    if (query.StartsWith("pluginVersion=") && query.Length > 14)
+                    {
+                        pluginVersion = Uri.UnescapeDataString(query[14..]);
+                    }
+
+                    if (query.StartsWith("pluginArguments=") && query.Length > 16)
+                    {
+                        pluginArguments = Uri.UnescapeDataString(query[16..]);
                     }
                 }
 
                 if (string.IsNullOrEmpty(pluginQueryContent)) // no plugin
                     return true;
 
-                var unescapedpluginQuery = Uri.UnescapeDataString(pluginQueryContent);
-                var parsedPluginQueryArray = unescapedpluginQuery.Split(';', 2);
+                var parsedPluginQueryArray = pluginQueryContent.Split(';', 2);
 
-                if (parsedPluginQueryArray.Length == 1)
+                switch (parsedPluginQueryArray.Length)
                 {
-                    server.PluginPath = parsedPluginQueryArray[0];
+                    case 1:
+                        server.PluginName = parsedPluginQueryArray[0];
+                        break;
+                    case 2:
+                        server.PluginName = parsedPluginQueryArray[0];
+                        server.PluginOptions = parsedPluginQueryArray[1];
+                        break;
                 }
-                else if (parsedPluginQueryArray.Length == 2) // is valid plugin query
-                {
-                    server.PluginPath = parsedPluginQueryArray[0];
-                    server.PluginOpts = parsedPluginQueryArray[1];
-                }
+
+                server.PluginVersion = pluginVersion;
+                server.PluginArguments = pluginArguments;
 
                 return true;
             }

@@ -19,8 +19,8 @@ namespace Shadowsocks.CLI.Clients
                 Method = method,
                 Password = password,
                 PluginPath = pluginPath,
-                PluginOpts = pluginOpts,
-                PluginArgs = pluginArgs,
+                PluginOptions = pluginOpts,
+                PluginArguments = pluginArgs,
             };
 
             var tcpRelay = new TCPRelay(server);
