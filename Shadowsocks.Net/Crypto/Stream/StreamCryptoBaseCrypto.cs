@@ -27,7 +27,7 @@ namespace Shadowsocks.Net.Crypto.Stream
                 var realKey = new byte[MD5Length];
                 key.CopyTo(temp);
                 iv.CopyTo(temp.Slice(keyLen));
-                MD5Utils.Fast440(temp, realKey);
+                CryptoUtils.Fast440(temp, realKey);
 
                 _crypto = StreamCryptoCreate.Rc4(realKey);
                 return;

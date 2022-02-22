@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AssemblyName>sscli</AssemblyName>
     <PackageId>Shadowsocks.CLI</PackageId>
     <Authors>Shadowsocks.NET</Authors>
     <Product>Shadowsocks CLI</Product>
     <Description>CLI for Shadowsocks server and client implementation in C#.</Description>
-    <Copyright>© 2021 Shadowsocks.NET</Copyright>
+    <Copyright>© 2022 Shadowsocks.NET</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</RepositoryUrl>
@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21352.2" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22121.1" />
   </ItemGroup>
 
   <ItemGroup>

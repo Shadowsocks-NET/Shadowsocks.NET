@@ -1,3 +1,4 @@
+using Shadowsocks.CLI.Utils;
 using Splat;
 using System.CommandLine.Parsing;
 using System.Net;
@@ -8,29 +9,35 @@ namespace Shadowsocks.CLI
 {
     public static class ClientCommand
     {
-        public static string? ValidateClientCommand(CommandResult commandResult)
+        public static void ValidateClientCommand(CommandResult commandResult)
         {
-            var hasListen = commandResult.Children.Contains("--listen");
-            var hasListenSocks = commandResult.Children.Contains("--listen-socks");
-            var hasListenHttp = commandResult.Children.Contains("--listen-http");
+            var hasListen = commandResult.ContainsSymbolWithName("listen");
+            var hasListenSocks = commandResult.ContainsSymbolWithName("listen-socks");
+            var hasListenHttp = commandResult.ContainsSymbolWithName("listen-http");
 
             if (!hasListen && !hasListenSocks && !hasListenHttp)
-                return "Please enable at least one local listener. Choose between `--listen`, `--listen-socks`, and `--listen-http`.";
+            {
+                commandResult.ErrorMessage = "Please enable at least one local listener. Choose between `--listen`, `--listen-socks`, and `--listen-http`.";
+                return;
+            }
 
-            var hasPassword = commandResult.Children.Contains("--password");
-            var hasKey = commandResult.Children.Contains("--key");
+            var hasPassword = commandResult.ContainsSymbolWithName("password");
+            var hasKey = commandResult.ContainsSymbolWithName("key");
 
             if ((!hasPassword && !hasKey) || (hasPassword && hasKey))
-                return "Please specify either a password or an encryption key.";
+            {
+                commandResult.ErrorMessage = "Please specify either a password or an encryption key.";
+                return;
+            }
 
-            var hasPlugin = commandResult.Children.Contains("--plugin-path");
-            var hasPluginOpts = commandResult.Children.Contains("--plugin-opts");
-            var hasPluginArgs = commandResult.Children.Contains("--plugin-args");
+            var hasPlugin = commandResult.ContainsSymbolWithName("plugin-path");
+            var hasPluginOpts = commandResult.ContainsSymbolWithName("plugin-opts");
+            var hasPluginArgs = commandResult.ContainsSymbolWithName("plugin-args");
 
             if (!hasPlugin && (hasPluginOpts || hasPluginArgs))
-                return "Missing `--plugin-path`.";
-
-            return null;
+            {
+                commandResult.ErrorMessage = "Missing `--plugin-path`.";
+            }
         }
 
         public static async Task<int> RunClientAsync(Backend backend, IPEndPoint? listen, IPEndPoint? listenSocks, IPEndPoint? listenHttp, string serverAddress, int serverPort, string method, string password, string key, string? pluginPath, string? pluginOpts, string? pluginArgs, CancellationToken cancellationToken)

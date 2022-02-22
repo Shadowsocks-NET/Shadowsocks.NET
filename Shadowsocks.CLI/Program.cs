@@ -2,7 +2,6 @@ using Splat;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -53,24 +52,35 @@ namespace Shadowsocks.CLI
             clientCommand.AddOption(pluginOptsOption);
             clientCommand.AddOption(pluginArgsOption);
             clientCommand.AddValidator(ClientCommand.ValidateClientCommand);
-            clientCommand.Handler = CommandHandler.Create<Backend, IPEndPoint?, IPEndPoint?, IPEndPoint?, string, int, string, string, string, string, string, string, CancellationToken>(ClientCommand.RunClientAsync);
+            clientCommand.SetHandler<Backend, IPEndPoint?, IPEndPoint?, IPEndPoint?, string, int, string, string, string, string, string, string, CancellationToken>(ClientCommand.RunClientAsync, backendOption, listenOption, listenSocksOption, listenHttpOption, serverAddressOption, serverPortOption, methodOption, passwordOption, keyOption, pluginPathOption, pluginOptsOption, pluginArgsOption);
 
             var serverCommand = new Command("server", "Shadowsocks server.");
             serverCommand.AddAlias("s");
-            serverCommand.Handler = CommandHandler.Create(() => LogHost.Default.Error("Not implemented."));
+            serverCommand.SetHandler(() => LogHost.Default.Error("Not implemented."));
+
+            var fromUrlsOption = new Option<string[]?>("--from-urls", "URL conversion sources. Multiple URLs are supported. Supported protocols are ss:// and https://.");
+            var fromOocv1ApiTokensOption = new Option<string[]?>("--from-oocv1-api-tokens", "Open Online Config 1 API token sources. Multiple tokens are supported.");
+            var fromOocv1JsonOption = new Option<string[]?>("--from-oocv1-json", "Open Online Config 1 JSON conversion sources. Multiple JSON files are supported.");
+            var fromSip008JsonOption = new Option<string[]?>("--from-sip008-json", "SIP008 JSON conversion sources. Multiple JSON files are supported.");
+            var fromV2rayJsonOption = new Option<string[]?>("--from-v2ray-json", "V2Ray JSON conversion sources. Multiple JSON files are supported.");
+            var prefixGroupNameOption = new Option<bool>("--prefix-group-name", "Whether to prefix group name to server names after conversion.");
+            var toUrlsOption = new Option<bool>("--to-urls", "Convert to ss:// links and print.");
+            var toOocv1JsonOption = new Option<string>("--to-oocv1-json", "Convert to Open Online Config 1 JSON and save to the specified path.");
+            var toSip008JsonOption = new Option<string>("--to-sip008-json", "Convert to SIP008 JSON and save to the specified path.");
+            var toV2rayJsonOption = new Option<string>("--to-v2ray-json", "Convert to V2Ray JSON and save to the specified path.");
 
             var convertConfigCommand = new Command("convert-config", "Convert between different config formats. Supported formats: SIP002 links, SIP008 delivery JSON, and V2Ray JSON (outbound only).");
-            convertConfigCommand.AddOption(new Option<string[]?>("--from-urls", "URL conversion sources. Multiple URLs are supported. Supported protocols are ss:// and https://."));
-            convertConfigCommand.AddOption(new Option<string[]?>("--from-oocv1-api-tokens", "Open Online Config 1 API token sources. Multiple tokens are supported."));
-            convertConfigCommand.AddOption(new Option<string[]?>("--from-oocv1-json", "Open Online Config 1 JSON conversion sources. Multiple JSON files are supported."));
-            convertConfigCommand.AddOption(new Option<string[]?>("--from-sip008-json", "SIP008 JSON conversion sources. Multiple JSON files are supported."));
-            convertConfigCommand.AddOption(new Option<string[]?>("--from-v2ray-json", "V2Ray JSON conversion sources. Multiple JSON files are supported."));
-            convertConfigCommand.AddOption(new Option<bool>("--prefix-group-name", "Whether to prefix group name to server names after conversion."));
-            convertConfigCommand.AddOption(new Option<bool>("--to-urls", "Convert to ss:// links and print."));
-            convertConfigCommand.AddOption(new Option<string>("--to-oocv1-json", "Convert to Open Online Config 1 JSON and save to the specified path."));
-            convertConfigCommand.AddOption(new Option<string>("--to-sip008-json", "Convert to SIP008 JSON and save to the specified path."));
-            convertConfigCommand.AddOption(new Option<string>("--to-v2ray-json", "Convert to V2Ray JSON and save to the specified path."));
-            convertConfigCommand.Handler = CommandHandler.Create(
+            convertConfigCommand.AddOption(fromUrlsOption);
+            convertConfigCommand.AddOption(fromOocv1ApiTokensOption);
+            convertConfigCommand.AddOption(fromOocv1JsonOption);
+            convertConfigCommand.AddOption(fromSip008JsonOption);
+            convertConfigCommand.AddOption(fromV2rayJsonOption);
+            convertConfigCommand.AddOption(prefixGroupNameOption);
+            convertConfigCommand.AddOption(toUrlsOption);
+            convertConfigCommand.AddOption(toOocv1JsonOption);
+            convertConfigCommand.AddOption(toSip008JsonOption);
+            convertConfigCommand.AddOption(toV2rayJsonOption);
+            convertConfigCommand.SetHandler(
                 async (string[]? fromUrls, string[]? fromOocv1ApiTokens, string[]? fromOocv1Json, string[]? fromSip008Json, string[]? fromV2rayJson, bool prefixGroupName, bool toUrls, string toOocv1Json, string toSip008Json, string toV2rayJson, CancellationToken cancellationToken) =>
                 {
                     var configConverter = new ConfigConverter(prefixGroupName);
@@ -115,7 +125,7 @@ namespace Shadowsocks.CLI
                     {
                         Console.WriteLine(ex.Message);
                     }
-                });
+                }, fromUrlsOption, fromOocv1ApiTokensOption, fromOocv1JsonOption, fromSip008JsonOption, fromV2rayJsonOption, prefixGroupNameOption, toUrlsOption, toOocv1JsonOption, toSip008JsonOption, toV2rayJsonOption);
 
             var utilitiesCommand = new Command("utilities", "Shadowsocks-related utilities.")
             {

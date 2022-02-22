@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <Authors>Shadowsocks.NET</Authors>
-    <Copyright>© 2021 Shadowsocks.NET</Copyright>
+    <Copyright>© 2022 Shadowsocks.NET</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>Common Shadowsocks models and utilities.</Description>
     <PackageProjectUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</PackageProjectUrl>

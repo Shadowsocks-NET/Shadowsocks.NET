@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <Authors>Shadowsocks.NET</Authors>
     <Description>Shadowsocks protocol support for Open Online Config 1 and SIP008.</Description>
-    <Copyright>© 2021 Shadowsocks.NET</Copyright>
+    <Copyright>© 2022 Shadowsocks.NET</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</RepositoryUrl>

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>App.manifest</ApplicationManifest>
     <Product>Shadowsocks WPF GUI</Product>
@@ -10,7 +10,7 @@
     <Version>5.0.0</Version>
     <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
-    <Copyright>© 2021 Shadowsocks.NET</Copyright>
+    <Copyright>© 2022 Shadowsocks.NET</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Shadowsocks-NET/Shadowsocks.NET</RepositoryUrl>
@@ -56,17 +56,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MaterialDesignThemes" Version="4.1.0" />
-    <PackageReference Include="MdXaml" Version="1.11.0" />
-    <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="14.1.1" />
-    <PackageReference Include="ReactiveUI.Fody" Version="14.1.1" />
-    <PackageReference Include="ReactiveUI.Validation" Version="2.1.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="14.1.1" />
-    <PackageReference Include="Splat.NLog" Version="11.1.1" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21352.2" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.3.0" />
+    <PackageReference Include="MdXaml" Version="1.13.0" />
+    <PackageReference Include="OxyPlot.Wpf" Version="2.1.0" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
+    <PackageReference Include="ReactiveUI.Fody" Version="17.1.50" />
+    <PackageReference Include="ReactiveUI.Validation" Version="2.2.1" />
+    <PackageReference Include="ReactiveUI.WPF" Version="17.1.50" />
+    <PackageReference Include="Splat.NLog" Version="14.1.45" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22121.1" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
-    <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
+    <PackageReference Include="WPFLocalizeExtension" Version="3.9.4" />
     <PackageReference Include="ZXing.Net" Version="0.16.6" />
   </ItemGroup>
 

@@ -12,6 +12,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Pack and upload NuGet package
         run: |
           dotnet pack Shadowsocks -c Release

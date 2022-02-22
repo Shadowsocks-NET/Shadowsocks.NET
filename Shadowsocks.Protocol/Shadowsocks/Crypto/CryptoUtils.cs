@@ -1,12 +1,16 @@
+using CryptoBase.Abstractions.Digests;
 using CryptoBase.Digests.MD5;
 using System;
 using System.Buffers;
 using System.Text;
+using System.Threading;
 
 namespace Shadowsocks.Protocol.Shadowsocks.Crypto
 {
     public static class CryptoUtils
     {
+        private static readonly ThreadLocal<IHash> _md5Digest = new(() => new DefaultMD5Digest());
+
         public static byte[] SSKDF(string password, int keylen)
         {
             const int md5Length = 16;
@@ -26,13 +30,13 @@ namespace Shadowsocks.Protocol.Shadowsocks.Crypto
                 {
                     if (i == 0)
                     {
-                        MD5Utils.Default(pw, md5Sum);
+                        _md5Digest.Value!.UpdateFinal(pw, md5Sum);
                     }
                     else
                     {
                         md5Sum.CopyTo(result);
                         pw.CopyTo(result.Slice(md5Length));
-                        MD5Utils.Default(result, md5Sum);
+                        _md5Digest.Value!.UpdateFinal(result, md5Sum);
                     }
 
                     var length = Math.Min(16, keylen - i);
